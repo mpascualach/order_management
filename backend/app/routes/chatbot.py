@@ -17,7 +17,6 @@ def get_order_status():
   if not validate_order_id(order_id):
     return jsonify({'error': 'Order ID is required'})
   
-  # Define get_order_status
   order_data = OrderService.get_order_status(order_id)
 
   if not order_data:

@@ -8,3 +8,5 @@ backend/app/services__pycache__
 backend/app/utils/__pycache__
 
 .pytest_cache
+
+.ipynb_checkpoints
