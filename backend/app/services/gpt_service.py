@@ -16,6 +16,17 @@ class GPTService:
     return response.choices[0].text.strip()
   
   @staticmethod
+  def format_messages(message_history, new_message):
+    formatted_messages = [
+      {"role": "system", "content": "You are a helpful assistant for BASF's Order Management system."}
+    ]
+    for msg in message_history:
+      formatted_messages.append({"role": "user", "content": msg['user_message']})
+      formatted_messages.append({"role": "assistant", "content": msg['ai_response']})
+    formatted_messages.append({"role": "user", "content": new_message})
+    return formatted_messages
+  
+  @staticmethod
   def format_order_status_prompt(order_data):
     prompt = f"Given the following order information:\n"
     prompt += f"Order ID: {order_data['id']}\n"
