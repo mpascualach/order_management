@@ -1,10 +1,12 @@
 .env
 
+backend/logs
 backend/venv/*
+backend/.venv/*
 backend/app/__pycache__
 backend/app/models/__pycache__
 backend/app/routes/__pycache__
-backend/app/services__pycache__
+backend/app/services/__pycache__
 backend/app/utils/__pycache__
 
 .pytest_cache
