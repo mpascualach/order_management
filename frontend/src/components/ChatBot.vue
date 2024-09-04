@@ -1,29 +1,44 @@
 <template>
-  <div class="fixed z-[1000] right-6 bottom-6">
+  <div class="fixed z-[1000] h-[600px] right-6 bottom-6">
     <div
-      class="w-[360px] h-[600px] bg-[white] shadow-[0_0_20px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden rounded-lg container">
-      <h1>MyBASF Chat</h1>
+      class="w-[360px] h-full bg-[white] shadow-[0_0_20px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden rounded-lg container">
+      <div class="p-4 flex justify-center align-center">
+        <h1 class="text-xl">MyBASF Chat</h1>
+      </div>
       <div
-        class="grow overflow-y-auto flex flex-col gap-3 max-h-[400px] overflow-y-auto grow py-0 p-4 border-y-[#f0f0f0] border-t border-solid border-b">
-        <template v-for="(message, index) in messages" :key="index">
-          <div class="flex mb-2"
-            :class="message.from == 'user' ? 'bg-[#1877F2] text-[white] rounded-tl-none' : 'messageFromChatGpt'">
-            <div class="flex flex-col" :class="message.from == 'user' ?
-              'align-end' :
-              'align-start'">
-              <div class="max-w-[60%] text-sm leading-[1.4] mb-0.5 px-3 py-2 rounded-[18px];" :class="message.from == 'user' ?
-                  'bg-[#1877F2] text-[white] rounded-tl-none' :
-                  'bg-[#EDEDED] text-[#222] rounded-tr-none'">
-                {{ message.data }}
+        class="h-full overflow-y-auto flex flex-col gap-3 overflow-y-auto grow p-4 border-y-[#f0f0f0] border-t border-solid border-b">
+        <template
+          v-for="(message, index) in messages"
+          :key="index">
+
+          <TransitionGroup name="slide-fade">
+            <div
+              class="flex"
+              :class="message.isUser ?
+                'justify-end' :
+                'justify-start'">
+              <div
+                class="max-w-[60%] text-sm leading-[1.4] mb-0.5 px-3 py-2 rounded-[18px]"
+                :class="message.isUser ?
+                  'bg-[#1877F2] text-[white] rounded-tr-none' :
+                  'bg-[#EDEDED] text-[#222] rounded-tl-none'"
+                v-if="message.show">
+                {{ message.text }}
               </div>
             </div>
-          </div>
+          </TransitionGroup> 
+
         </template>
       </div>
       <div class="flex items-center bg-[#f0f0f0] p-2">
-        <input v-model="currentMessage" type="text" class="grow text-base bg-[white] mr-2 p-3 rounded-3xl border-[none]"
+        <input
+          v-model="newMessage"
+          @keyup.enter="sendMessage"
+          class="grow text-base bg-[white] mr-2 p-3 rounded-3xl border-[none]"
           placeholder="Ask me anything..." />
-        <button @click="sendMessage(currentMessage)"
+
+        <button
+          @click="sendMessage"
           class="bg-[#1877F2] text-[white] text-base cursor-pointer transition-[background-color] duration-[0.3s] ease-[ease-in-out] px-4 py-2 rounded-3xl border-[none] hover:bg-[#145CB3]">
           Ask
         </button>
@@ -33,34 +48,56 @@
 </template>
 
 <script>
-// import axios from 'axios';
+import { ref } from 'vue';
+import axios from 'axios';
 
 export default {
-  name: 'ChatBot',
-  data() {
-    return {
-      currentMessage: '',
-      messages: [],
+  setup() {
+    const messages = ref([]);
+    const newMessage = ref('');
+    let messageId = 0;
+
+    const addMessage = async(text, isUser) => {
+      const message = {
+        id: messageId++,
+        text,
+        isUser,
+        show: false
+      }
+      messages.value.push(message);
+
+      setTimeout(() => {
+        messages.value[messages.value.length - 1].show = true;
+      }, 100);
     };
-  },
-  methods: {
-    async sendMessage(message) {
-      this.messages.push({
-        from: 'user',
-        data: message,
-      });
-      // await axios
-      //   .post('http://localhost:3000/chatbot', {
-      //     message: message,
-      //   })
-      //   .then((response) => {
-      //     this.messages.push({
-      //       from: 'chatGpt',
-      //       data: response.data.data, // Access the 'data' property of the response object
-      //     });
-      //   });
-    },
-  },
+
+    const sendMessage = () => {
+      if (newMessage.value.trim()) {
+        addMessage(newMessage.value, true);
+        newMessage.value = "";
+
+        setTimeout(() => {
+          addMessage("Hi this is a Chatbot response!", false);
+        }, 100)
+      }
+    };
+
+    const checkHealth = async() => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/health');
+        console.log("Helath check response: ", response.data.status);
+      } catch (error) {
+        console.error("Error checking health: ", error);
+      }
+    }
+    checkHealth();
+
+    return {
+      messages,
+      newMessage,
+      sendMessage
+    }
+  }
 };
 </script>
 
@@ -71,6 +108,16 @@ export default {
   .container {
     @apply w-full max-w-none rounded-none;
   }
+}
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 
 
