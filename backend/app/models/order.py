@@ -1,12 +1,14 @@
 from app import db
+from datetime import datetime
 
 class Order(db.Model):
   id = db.Column(db.Integer, primary_key=True)
-  customer_id = db.Column(db.Integer, nullable=False)
+  customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'), nullable=False)
   item = db.Column(db.String(20), nullable=False)
   measurement = db.Column(db.String(20), nullable=False)
-  order_date = db.Column(db.DateTime, nullable=False)
+  order_date = db.Column(db.DateTime, default=datetime.now(),nullable=False)
   total_amount = db.Column(db.Float, nullable=False)
+  currency = db.Column(db.String(3), nullable=False)
   status = db.Column(db.String(20), nullable=False)
   pdf_path = db.Column(db.String(255), nullable=True)
 

@@ -1,24 +1,37 @@
-import openai
+import os
+from openai import OpenAI
 from app.config import Config
+
+client = OpenAI(
+  api_key=os.environ.get('OPENAI_API_KEY')
+)
 
 class GPTService:
   @staticmethod
-  def generate_response(prompt):
-    openai.api_key = Config.OPENAI_API_KEY
-    response = openai.Completion.create(
-      engine="text-davinci-002",
-      prompt=prompt,
+  def generate_welcome_message(customer_context):
+    system_message = f"You are a helpful assistant for BASF's Order Management system. Here's some context about the customer:\n{customer_context}"
+    messages = [
+      {"role": "system", "content": system_message},
+      {"role": "user", "content": "Generate a friendly welcome message for the customer"}
+    ]
+    return GPTService.generate_response(messages)
+
+  @staticmethod
+  def generate_response(messages):
+    response = client.chat.completions.create(
+      model="gpt-3.5-turbo",
+      messages=messages,
       max_tokens=150,
       n=1,
       stop=None,
       temperature=0.5
     )
-    return response.choices[0].text.strip()
+    return response.choices[0].message.content.strip()
   
   @staticmethod
-  def format_messages(message_history, new_message):
+  def format_messages(message_history, new_message, customer_context):
     formatted_messages = [
-      {"role": "system", "content": "You are a helpful assistant for BASF's Order Management system."}
+      {"role": "system", "content": "You are a helpful assistant for BASF's Order Management system. Here's some context about the customer:\n{customer_context}"}
     ]
     for msg in message_history:
       formatted_messages.append({"role": "user", "content": msg['user_message']})
@@ -34,5 +47,5 @@ class GPTService:
     prompt += f"Order Date: {order_data['order_date']}\n"
     prompt += f"Status: {order_data['status']}\n"
     prompt += f"Total Amount: ${order_data['total_amount']:.2f}\n\n"
-    prompt += "Provide a concise summary of the order status in a friendly tone."
+    prompt += "Provide a concise summary of the order status in a friendly tone. If you don't know the answer to a follow-up question, tell the user that you don't know but offer to connect them with a customer representative."
     return prompt

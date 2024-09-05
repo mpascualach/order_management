@@ -13,7 +13,6 @@ def get_order_status():
   data = request.json
   order_id = data['order_id']
 
-  # check if id is valid (how much would customers be relying on IDs)
   if not validate_order_id(order_id):
     return jsonify({'error': 'Order ID is required'})
   

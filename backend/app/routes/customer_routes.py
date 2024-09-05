@@ -4,6 +4,22 @@ from app.services.gpt_service import GPTService
 
 customer_bp = Blueprint('customer_bp', __name__)
 
+@customer_bp.route('/chats/<int:customer_id>/start', methods=['POST'])
+def start_chat_session(customer_id):
+  customer_context = CustomerService.get_customer_context(customer_id)
+  welcome_message = GPTService.generate_welcome_message(customer_context)
+
+  chat_id = CustomerService.create_new_chat(customer_id)
+  success = CustomerService.add_message(customer_id, chat_id, None, welcome_message)
+
+  if success:
+    return jsonify({
+      "chat_id": chat_id,
+      "ai_welcome_message": welcome_message
+    }), 201
+  else:
+    return "Failed to create new chat session", 400
+
 @customer_bp.route('/chats/<int:customer_id>/<int:chat_id>/messages', methods=['POST'])
 def send_message(customer_id, chat_id):
   message_content = request.json.get('message')
@@ -11,6 +27,7 @@ def send_message(customer_id, chat_id):
     return "Message content is required", 400
   
   chat_history = CustomerService.get_chat_history(customer_id, chat_id)
+  customer_context = CustomerService.get_customer_context(customer_id)
 
   formatted_messages = GPTService.format_messages(chat_history, message_content)
   
