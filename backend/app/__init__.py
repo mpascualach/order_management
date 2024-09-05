@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -18,6 +20,10 @@ def init_db(app):
   print("Database tables created.")
 
 def create_app(init_database=False):
+  os.environ.clear()
+
+  load_dotenv()
+  
   app = Flask(__name__)
   CORS(app)
   app.config.from_object(Config)
@@ -29,6 +35,7 @@ def create_app(init_database=False):
   from app.routes.testing.health import health
   from app.routes.customer_routes import customer_bp
   from app.routes.order_routes import order_bp
+  from app.routes.test_routes import test_bp  # Add this line
   from app.routes.testing.db_connection_test import db_test
 
   app.register_blueprint(chatbot, url_prefix='/chatbot')
@@ -36,6 +43,7 @@ def create_app(init_database=False):
   app.register_blueprint(customer_bp, url_prefix='/')
   app.register_blueprint(order_bp, url_prefix='/')
   app.register_blueprint(db_test, url_prefix='/')
+  app.register_blueprint(test_bp, url_prefix='/test')
 
   register_error_handlers(app)
   setup_logger(app)

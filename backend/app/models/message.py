@@ -7,3 +7,12 @@ class Message(db.Model):
   content = db.Column(db.Text, nullable=False)
   timestamp = db.Column(db.DateTime, default=datetime.now())
   is_from_user = db.Column(db.Boolean, default=True)
+
+  def to_dict(self):
+    return {
+      'id': self.id,
+      'chat_id': self.chat_id,
+      'content': self.content,
+      'timestamp': self.timestamp,
+      'is_from_user': self.is_from_user,
+    }

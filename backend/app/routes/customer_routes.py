@@ -29,7 +29,7 @@ def send_message(customer_id, chat_id):
   chat_history = CustomerService.get_chat_history(customer_id, chat_id)
   customer_context = CustomerService.get_customer_context(customer_id)
 
-  formatted_messages = GPTService.format_messages(chat_history, message_content)
+  formatted_messages = GPTService.format_messages(chat_history, message_content, customer_context)
   
   ai_response = GPTService.generate_response(formatted_messages)
 
@@ -37,7 +37,6 @@ def send_message(customer_id, chat_id):
 
   if success:
     return jsonify({
-      "customer_message": message_content,
       "ai_response": ai_response
     }), 201
   else:

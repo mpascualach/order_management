@@ -30,12 +30,14 @@ class GPTService:
   
   @staticmethod
   def format_messages(message_history, new_message, customer_context):
-    formatted_messages = [
-      {"role": "system", "content": "You are a helpful assistant for BASF's Order Management system. Here's some context about the customer:\n{customer_context}"}
-    ]
+    formatted_messages = []
+    
     for msg in message_history:
-      formatted_messages.append({"role": "user", "content": msg['user_message']})
-      formatted_messages.append({"role": "assistant", "content": msg['ai_response']})
+      if 'user_message' in msg and msg['user_message']:
+        formatted_messages.append({"role": "user", "content": msg['user_message']})
+      if 'ai_response' in msg and msg['ai_response']:
+        formatted_messages.append({"role": "assistant", "content": msg['ai_response']})
+      
     formatted_messages.append({"role": "user", "content": new_message})
     return formatted_messages
   

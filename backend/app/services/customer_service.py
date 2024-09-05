@@ -3,6 +3,7 @@ from app import db
 from app.models.customer import Customer
 from app.models.order import Order
 from app.models.message import Message
+from sqlalchemy import desc, func
 
 class CustomerService:
   @staticmethod
@@ -75,9 +76,26 @@ class CustomerService:
 
   @staticmethod
   def get_chats_for_customer(customer_id):
+    print(f"Customer id: {customer_id}")
     try:
-      chats = Chat.query.filter_by(customer_id=customer_id).order_by(Chat.timestamp).all()
-      return [chat.to_dict() for chat in chats]
+      chats = Chat.query.filter_by(customer_id=customer_id).all()
+
+      chat_data = []
+
+      for chat in chats:
+        latest_message = Message.query.filter_by(chat_id=chat.id).order_by(Message.timestamp.desc()).first()
+
+        if latest_message:
+          chat_data.append({
+            'chat': chat.to_dict(),
+            'latest_message_timestamp': latest_message.timestamp
+          })
+
+        # Sort the chat_data list by the latest message timestamp
+        chat_data.sort(key=lambda x: x['latest_message_timestamp'], reverse=True)
+        
+        # Return only the chat data, maintaining the sorted order
+        return [item['chat'] for item in chat_data]
     except Exception as e:
       print(f"Error retrieving chats: {str(e)}")
       return None
