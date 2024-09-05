@@ -2,33 +2,42 @@
   <div class="fixed z-[1000] h-[600px] right-6 bottom-6">
     <div
       class="w-[360px] h-full bg-[white] shadow-[0_0_20px_rgba(0,0,0,0.1)] flex flex-col overflow-hidden rounded-lg container">
-      <div class="p-4 flex justify-center align-center">
-        <h1 class="text-xl">MyBASF Chat</h1>
+      <div class="p-4 flex flex-col gap-4 justify-center items-center">
+        <div class="flex w-full justify-center items-center p-4 relative">
+          <span
+            class="absolute left-0"
+            v-if="!isInPastChatsMode"
+            @click="isInPastChatsMode = true">
+            Back
+          </span>
+          <h1 class="text-xl">MyBASF Chat</h1>
+        </div>
+
+        <SimulationSwitch
+          v-model="isSimulated"
+          @update:modelValue="toggleChatMode">
+        </SimulationSwitch>
       </div>
       <div
         class="h-full overflow-y-auto flex flex-col gap-3 overflow-y-auto grow p-4 border-y-[#f0f0f0] border-t border-solid border-b">
-        <template
-          v-for="(message, index) in messages"
-          :key="index">
-
+        <template v-if="!isInPastChatsMode">
           <TransitionGroup name="slide-fade">
-            <div
-              class="flex"
-              :class="message.isUser ?
-                'justify-end' :
-                'justify-start'">
-              <div
-                class="max-w-[60%] text-sm leading-[1.4] mb-0.5 px-3 py-2 rounded-[18px]"
-                :class="message.isUser ?
-                  'bg-[#1877F2] text-[white] rounded-tr-none' :
-                  'bg-[#EDEDED] text-[#222] rounded-tl-none'"
-                v-if="message.show">
-                {{ message.text }}
-              </div>
-            </div>
+            <ChatMessage
+              v-for="message in messages"
+              :key="message.id"
+              :text="message.text"
+              :isUser="message.isUser"
+              v-show="message.show">
+            </ChatMessage>
           </TransitionGroup> 
-
         </template>
+        <template v-else>
+          <ChatList
+            :chats=chats
+            @select-chat="selectChat">
+          </ChatList> 
+        </template>
+
       </div>
       <div class="flex items-center bg-[#f0f0f0] p-2">
         <input
@@ -50,12 +59,32 @@
 <script>
 import { ref } from 'vue';
 import axios from 'axios';
+import ChatMessage from './ChatMessage.vue';
+import SimulationSwitch from './SimulationSwitch.vue';
+import ChatList from './ChatList.vue';
+import { fakeChats } from '@/mock-data/fakeChats';
 
 export default {
+  components: {
+    ChatMessage,
+    SimulationSwitch,
+    ChatList
+  },
   setup() {
     const messages = ref([]);
     const newMessage = ref('');
+
     let messageId = 0;
+    const isInPastChatsMode = ref(false);
+
+    // hardcoded for now
+    const chats = ref(fakeChats);
+
+    const selectChat = (chat) => {
+      console.log("Chat received in selectChat: ", chat);
+      isInPastChatsMode.value = false;
+      messages.value = chat.messages;
+    }
 
     const addMessage = async(text, isUser) => {
       const message = {
@@ -93,9 +122,12 @@ export default {
     checkHealth();
 
     return {
+      isInPastChatsMode,
+      chats,
       messages,
       newMessage,
-      sendMessage
+      sendMessage,
+      selectChat
     }
   }
 };

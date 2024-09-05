@@ -12,3 +12,5 @@ backend/app/utils/__pycache__
 .pytest_cache
 
 .ipynb_checkpoints
+# Local Netlify folder
+.netlify
