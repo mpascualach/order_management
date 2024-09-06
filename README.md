@@ -56,4 +56,8 @@
    - Table view for requested orders from a specific customer
    - Interface for downloading Excel/CSV files
 
-You may access a deployed (provisional) version of the chatbot here: https://ordermanagement2.netlify.app/
+You can access a deployed (provisional) version of the chatbot here: https://ordermanagement2.netlify.app/
+
+## Other To-dos:
+
+1. Test with other LLMs (or create a proprietary one)

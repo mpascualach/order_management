@@ -5,7 +5,32 @@ from app.services.chroma_service import ChromaDBService
 from app.utils.validators import validate_order_id #define validate_order_id
 from app.utils.limiter import limiter
 
+from langchain import PromptTemplate, LLMChain
+from langchain.llms import OpenAI
+from langchain.chains import create_qa_with_sources_chain
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import Chroma
+from langchain.chat_models import ChatOpenAI
+
 chatbot = Blueprint('chatbot', __name__)
+
+# Initialise LangChain components
+llm = ChatOpenAI(temperature=0.2)
+embeddings = OpenAIEmbeddings()
+vectorstore = Chroma(embedding_function=embeddings)
+
+order_status_template = PromptTemplate(
+  input_variables=["order_data"],
+  template="Given the following order data: {order_data}\nProvide a summary of the order status."
+)
+
+order_query_template = PromptTemplate(
+  input_variables=["context", "query"],
+  template="Given the following context about orders:\n{context}\n\nAnswer the following question: {query}"
+)
+
+order_status_chain = LLMChain(llm=llm, prompt=order_status_template)
+order_query_chain = create_qa_with_sources_chain(llm)
 
 @chatbot.route('/order_status', methods=['POST'])
 @limiter.limit("5 per minute")
