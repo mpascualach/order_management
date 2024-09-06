@@ -1,14 +1,10 @@
 import chromadb
-from chromadb.config import Settings
 import PyPDF2
 import openai
 import os
 
 class ChromaDBService:
-  client = chromadb.Client(Settings(
-    chroma_db_impl="duckdb+parquet",
-    persist_directory="./chroma_db"
-  ))
+  client = chromadb.PersistentClient(path="./chroma_db")
   collection = client.get_or_create_collection("order_pdfs")
   
   openai.api_key = os.getenv('OPENAI_API_KEY')

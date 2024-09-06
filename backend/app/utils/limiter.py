@@ -5,3 +5,5 @@ limiter = Limiter(key_func=get_remote_address)
 
 def init_limiter(app):
   limiter.init_app(app)
+
+# to implement: redis for a more production-ready version

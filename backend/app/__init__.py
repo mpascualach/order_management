@@ -10,17 +10,17 @@ from app.utils.limiter import init_limiter
 
 db = SQLAlchemy()
 
-def init_db(app):
-  with app.app_context():
-    from app.models.customer import Customer
-    from app.models.order import Order
-    from app.models.chat import Chat
-    from app.models.message import Message
-    db.create_all()
-  print("Database tables created.")
+# def init_db(app):
+#   with app.app_context():
+#     from app.models.customer import Customer
+#     from app.models.order import Order
+#     from app.models.chat import Chat
+#     from app.models.message import Message
+#     db.create_all()
+#   print("Database tables created.")
 
 def create_app(init_database=False):
-  os.environ.clear()
+  # os.environ.clear()
 
   load_dotenv()
   
@@ -38,6 +38,7 @@ def create_app(init_database=False):
   from app.routes.test_routes import test_bp  # Add this line
   from app.routes.testing.db_connection_test import db_test
 
+  # create prefixes for API
   app.register_blueprint(chatbot, url_prefix='/chatbot')
   app.register_blueprint(health, url_prefix='/')
   app.register_blueprint(customer_bp, url_prefix='/')
@@ -49,6 +50,8 @@ def create_app(init_database=False):
   setup_logger(app)
 
   if init_database:
-    init_db(app)
+    with app.app_context():
+        db.create_all()
+    print("Database tables created.")
 
   return app

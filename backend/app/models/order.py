@@ -18,7 +18,7 @@ class Order(db.Model):
       'customer_id': self.customer_id,
       'item': self.item,
       'measurement': self.measurement,
-      'order_date': self.order_date,
+      'order_date': self.order_date.isoformat() if self.order_date else None,
       'status': self.status,
       'total_amount': self.total_amount,
     }

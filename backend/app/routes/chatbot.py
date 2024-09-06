@@ -1,16 +1,17 @@
 from flask import Blueprint, request, jsonify
 from app.services.order_service import OrderService
-from app.services.gpt_service import GPTService
-from app.services.chroma_service import ChromaDBService
+# from app.services.gpt_service import GPTService
+# from app.services.chroma_service import ChromaDBService
 from app.utils.validators import validate_order_id #define validate_order_id
 from app.utils.limiter import limiter
 import json
 
-from langchain import PromptTemplate, LLMChain
-from langchain.llms import OpenAI
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain_openai import ChatOpenAI
 from langchain.chains import create_qa_with_sources_chain
-from langchain.embeddings import OpenAIEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_chroma import Chroma
 from langchain.chat_models import ChatOpenAI
 
 chatbot = Blueprint('chatbot', __name__)
@@ -50,8 +51,10 @@ def get_order_status():
     return jsonify({'error': 'Order not found'})
   
   order_data_str=json.dumps(order_data)
+  print(f"Order data string: {order_data_str}")
   
   response = order_status_chain.run(order_data=order_data_str)
+  print(f"Response: {response}")
 
   return jsonify({
     'order_data': order_data,

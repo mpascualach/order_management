@@ -1,3 +1,4 @@
+import traceback
 from flask import jsonify
 
 def register_error_handlers(app):
@@ -12,3 +13,8 @@ def register_error_handlers(app):
   @app.errorhandler(500)
   def internal_server_error(error):
     return jsonify({'error': 'Internal Server Error', 'message': str(error)}), 500
+  
+  @app.errorhandler(Exception)
+  def handle_exception(e):
+    tb = traceback.format_exc().splitlines()[-1]
+    return jsonify(error=str(e), traceback=tb), 500

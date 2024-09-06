@@ -1,7 +1,7 @@
 from app.models.order import Order
 from app import db
 from app.services.pdf_service import PDFService
-from app.services.chroma_service import ChromaDBService
+# from app.services.chroma_service import ChromaDBService
 
 import csv
 from io import StringIO
