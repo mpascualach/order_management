@@ -56,4 +56,4 @@
    - Table view for requested orders from a specific customer
    - Interface for downloading Excel/CSV files
 
-Note: The frontend implementation details are limited in the provided code snippets, so the actual state of the frontend may differ from this description.
+You may access a deployed (provisional) version of the chatbot here: https://ordermanagement2.netlify.app/
