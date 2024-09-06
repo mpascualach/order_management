@@ -20,7 +20,6 @@ export default {
   emits: ['select-chat'],
   setup(props, { emit }) {
     const handleClick = (chat) => {
-      console.log("Chat clicked in ChatList: ", chat);
       emit('select-chat', chat);
     };
 
