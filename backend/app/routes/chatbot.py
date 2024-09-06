@@ -33,8 +33,24 @@ order_query_template = PromptTemplate(
   template="Given the following context about orders:\n{context}\n\nAnswer the following question: {query}"
 )
 
+order_analysis_template = PromptTemplate(
+  input_variables=["query", "orders"],
+  template="""
+    Analyze the following user query about their orders:
+    Query: {query}
+
+    Here are the user's orders:
+    {orders}
+
+    Provide a brief and to-the-point response addressing the user's question.
+    Focus only on the most relevant information.
+    Limit your response to 2-3 sentences maximum.
+    Follow your answer with a suggestion as to how you can help or, if there is no help in particular to follow up with, just offer your help.
+  """
+)
+
 order_status_chain = LLMChain(llm=llm, prompt=order_status_template)
-order_query_chain = create_qa_with_sources_chain(llm)
+order_analysis_chain = LLMChain(llm=llm, prompt=order_analysis_template)
 
 @chatbot.route('/order_status', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -66,20 +82,21 @@ def get_order_status():
 def query_order():
   data = request.json
   query = data['query']
-  order_id = data.get('order_id')
+  user_id = data.get('user_id')
 
-  docs = vectorstore.similarity_search(query)
+  # Fetch all current orders for the user
+  current_orders = OrderService.get_user_orders()
 
-  if order_id:
-    docs = [doc for doc in docs if doc.metadata['order_id'] == str(order_id)]
+  if not current_orders:
+    return jsonify({'error': 'No orders found for this user'})
+  
+  orders_str = json.dumps(current_orders, indent=2)
 
-  context = "\n".join([doc.page_content for doc in docs])
-
-  response = order_query_chain.run(context=context, query=query)
+  response = order_analysis_chain.run(query=query, orders=orders_str)
 
   return jsonify({
     'query': query,
     'ai_response': response,
-    'relevant_orders': [doc.metadata['order_id'] for doc in docs]
+    'orders_analyzed': len(current_orders)
   })
   

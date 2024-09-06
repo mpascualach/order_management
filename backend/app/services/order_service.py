@@ -3,8 +3,7 @@ from app import db
 from app.services.pdf_service import PDFService
 # from app.services.chroma_service import ChromaDBService
 
-import csv
-from io import StringIO
+from sqlalchemy import desc
 
 class OrderService:
   @staticmethod
@@ -67,6 +66,14 @@ class OrderService:
       print(f"Error retrieving order PDF: {str(e)}")
       return None
     
+  @staticmethod
+  def get_user_orders():
+    try:
+      orders = Order.query.order_by(desc(Order.order_date)).all()
+      return [order.to_dict() for order in orders]
+    except Exception as e:
+      print(f"Error retrieving user orders: {str(e)}")
+
   @staticmethod
   def get_orders_csv(customer_id):
     try:
