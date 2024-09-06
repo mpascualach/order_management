@@ -4,6 +4,7 @@ from app.services.gpt_service import GPTService
 from app.services.chroma_service import ChromaDBService
 from app.utils.validators import validate_order_id #define validate_order_id
 from app.utils.limiter import limiter
+import json
 
 from langchain import PromptTemplate, LLMChain
 from langchain.llms import OpenAI
@@ -19,11 +20,13 @@ llm = ChatOpenAI(temperature=0.2)
 embeddings = OpenAIEmbeddings()
 vectorstore = Chroma(embedding_function=embeddings)
 
+# Structure prompt for providing order status
 order_status_template = PromptTemplate(
   input_variables=["order_data"],
   template="Given the following order data: {order_data}\nProvide a summary of the order status."
 )
 
+# Structure prompt for providing order query
 order_query_template = PromptTemplate(
   input_variables=["context", "query"],
   template="Given the following context about orders:\n{context}\n\nAnswer the following question: {query}"
@@ -46,8 +49,9 @@ def get_order_status():
   if not order_data:
     return jsonify({'error': 'Order not found'})
   
-  prompt = GPTService.format_order_status_prompt(order_data)
-  response = GPTService.generate_response(prompt)
+  order_data_str=json.dumps(order_data)
+  
+  response = order_status_chain.run(order_data=order_data_str)
 
   return jsonify({
     'order_data': order_data,
@@ -61,21 +65,18 @@ def query_order():
   query = data['query']
   order_id = data.get('order_id')
 
-  chroma_results = ChromaDBService.search_pdf_content(query)
+  docs = vectorstore.similarity_search(query)
 
   if order_id:
-    filtered_results = [r for r in chroma_results['metadatas'][0] if r['order_id'] == str(order_id)]
-  else:
-    filtered_results = chroma_results['metadatas'][0]
+    docs = [doc for doc in docs if doc.metadata['order_id'] == str(order_id)]
 
-  context = "\n".join([f"Order {r['order_id']}: {chroma_results['documents'][0][i]}" for i, r in enumerate(filtered_results)])
+  context = "\n".join([doc.page_content for doc in docs])
 
-  prompt = f"Given the following context about orders:\n{context}\n\nAnswer the following question: {query}"
-  response = GPTService.generate_response(prompt)
+  response = order_query_chain.run(context=context, query=query)
 
   return jsonify({
     'query': query,
     'ai_response': response,
-    'relevant_orders': [r['order_id'] for r in filtered_results]
+    'relevant_orders': [doc.metadata['order_id'] for doc in docs]
   })
   
