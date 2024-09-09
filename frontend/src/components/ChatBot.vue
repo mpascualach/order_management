@@ -9,7 +9,7 @@
             v-if="!isInPastChatsMode"
             @click="isInPastChatsMode = true">
           </BackButton>
-          <h1 class="text-xl">MyBASF Chat</h1>
+          <h1 class="text-xl">myOrderManagement</h1>
         </div>
 
         <!-- <SimulationSwitch
@@ -199,7 +199,7 @@ export default {
       isInPastChatsMode.value = false;
       messages.value = [];
       visibleSuggestions.value = [];
-      addMessage("Hi! Wecome to myBASF World. How may I be of help?", false);
+      addMessage("Hi! Welcome to myOrderManagement. How may I be of help?", false);
       graduallyLoadSuggestions();
     }
 

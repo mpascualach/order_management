@@ -4,6 +4,8 @@ from app.services.pdf_service import PDFService
 # from app.services.chroma_service import ChromaDBService
 
 from sqlalchemy import desc
+from io import StringIO
+import csv
 
 class OrderService:
   @staticmethod
@@ -16,16 +18,28 @@ class OrderService:
     except Exception as e:
       print(f"Error retrieving order sattus: {str(e)}")
       return None
-    
+
+  # for creating orders (this isn't meant to be a chatbot specific thing and, in a large company),
+  # if wouldn't be advisable to just let someone create orders but we could use this function
+  # for testing purposes
+  
   @staticmethod
-  def create_order(customer_id, item, measurement, status, total_amount):
+  def create_order(
+    customer_id,
+    item,
+    measurement,
+    status,
+    total_amount,
+    currency,
+    pdf_path):
     try:
       new_order = Order(
         customer_id=customer_id,
         item=item,
         measurement=measurement,
         status=status,
-        total_amount=total_amount
+        total_amount=total_amount,
+        currency=currency
       )
       db.session.add(new_order)
       db.session.flush()

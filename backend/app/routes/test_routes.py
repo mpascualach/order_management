@@ -19,3 +19,9 @@ def test_openai_connection():
       "status": "error",
       "message": f"Failed to connect to OpenAI API: {str(e)}"
     }), 500
+  
+# @test_bp.route('/add-new-order', methods=['POST'])
+# def test_add_new_object():
+#   data = request.json
+
+#   product_id = data.get()

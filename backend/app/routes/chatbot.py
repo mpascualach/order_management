@@ -9,7 +9,6 @@ import json
 from langchain_core.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import ChatOpenAI
-from langchain.chains import create_qa_with_sources_chain
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain.chat_models import ChatOpenAI
@@ -17,6 +16,7 @@ from langchain.chat_models import ChatOpenAI
 chatbot = Blueprint('chatbot', __name__)
 
 # Initialise LangChain components
+# The idea of course would be to use a custom LLM (or test a lot with other LLMs)
 llm = ChatOpenAI(temperature=0.2)
 embeddings = OpenAIEmbeddings()
 vectorstore = Chroma(embedding_function=embeddings)
@@ -82,7 +82,6 @@ def get_order_status():
 def query_order():
   data = request.json
   query = data['query']
-  user_id = data.get('user_id')
 
   # Fetch all current orders for the user
   current_orders = OrderService.get_user_orders()

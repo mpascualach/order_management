@@ -9,7 +9,7 @@ client = OpenAI(
 class GPTService:
   @staticmethod
   def generate_welcome_message(customer_context):
-    system_message = f"You are a helpful assistant for BASF's Order Management system. Here's some context about the customer:\n{customer_context}"
+    system_message = f"You are a helpful assistant for an Order Management system. Here's some context about the customer:\n{customer_context}"
     messages = [
       {"role": "system", "content": system_message},
       {"role": "user", "content": "Generate a friendly welcome message for the customer"}
